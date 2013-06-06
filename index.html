@@ -16,17 +16,18 @@
 	th { font-size: 16px; padding: 10px; }
 	tr span { font-size: 14px; color: silver; font-weight:normal; }
 	p { margin: 20px;}
+	tr p, th p { margin: 0; }
 	</style>
 </head>
 <body>
 
 	<h1><a href=""><img src="img/hi_logo.png" alt="Heart Internet"> Unofficial Status Page</a></h1>
-	<p><a href="http://www.webhostingstatus.com/" target="_blank">Go to the official Status and Maintenance Page</a></p>
+	<p><a href="http://www.webhostingstatus.com/">Go to the official Status and Maintenance Page</a></p>
 
 	<table class="table-striped">
 		<tbody>
 			<thead>
-				<tr><th colspan="6">Last updated 14:39pm<br><span>This page will update itself in 10 minutes.</span></th></tr>
+				<tr><th colspan="6">Last updated 14:40pm<br><span>This page will update itself in 10 minutes.</span></th></tr>
 			</thead>
 			<tr>
 				<th colspan="6">Thu 6th Jun 2013</th>
@@ -599,28 +600,44 @@
 	</table>
 
 	<p>Information crawled once per minute from <a href="http://www.webhostingstatus.com/">Heart Internet's official status and maintenance page</a>.</p>
-	<p>Built for you by <a href="https://github.com/jdbevan">Jon Bevan</a>. No affiliation with Heart Internet.</p>
+	<p>Built for you by <a href="https://github.com/jdbevan">Jon Bevan</a> using <a href="http://pages.github.com/">Github Page</a>, <a href="http://twitter.github.io/bootstrap/">Bootstrap</a> and <a href="http://developer.yahoo.com/yql/">YQL</a>. No affiliation with <a href="http://www.heartinternet.co.uk">Heart Internet</a>.</p>
 
 	<script src="http://code.jquery.com/jquery.js"></script>
 	<script>
 	$(function() {
-		var interval_minutes = 10;
-		setInterval(
-			function() {
-				$("body > table").load(document.location + ' table');
-			}, interval_minutes*60*1000
-		);
-		setInterval(
-			function() {
-				var msg = $("table thead span").text().replace(/[0-9]+ minutes?.$/, ''),
-					intMin = parseInt( $("table thead span").text().replace(/[^0-9]/g, '') );
-				if (intMin !== NaN) {
-					msg += --intMin;
-					msg += (intMin == 1) ? " minute." : " minutes.";
-					$("table thead span").text(msg);
-				}
-			}, 1*60*1000
-		);
+		var interval_minutes = 5;
+		function updateTimer(t) {
+			var msg = $("table thead span").text().replace(/[0-9]+ minutes?.$/, ''),
+				intMin = parseInt( $("table thead span").text().replace(/[^0-9]/g, '') );
+			if (t != undefined) {
+				msg += t;
+				msg += (t == 1) ? " minute." : " minutes.";
+				$("table thead span").text(msg);
+			} else if (intMin !== NaN) {
+				msg += --intMin;
+				msg += (intMin == 1) ? " minute." : " minutes.";
+				$("table thead span").text(msg);
+			}
+		}
+		function updatePage(interval_minutes) {
+			var q = encodeURIComponent("SELECT * FROM html WHERE url='https://raw.github.com/jdbevan/heartinternetstatus/gh-pages/index.html'");
+			$.getJSON("http://query.yahooapis.com/v1/public/yql?q=" + q + "&format=xml&callback=?",
+				function(data) {
+					if (data.results.length > 0) {
+						var html = $.parseHTML(data.results[0]);
+						for(var i=0, m=html.length; i<m; i++){
+							if (html[i].nodeName.toLowerCase() === "table") {
+								$("table").replaceWith(html[i]);
+								updateTimer(interval_minutes);
+								break;
+							}
+						}
+					}
+				});
+		}
+		updatePage(interval_minutes);
+		setInterval(function() { updatePage(interval_minutes); }, interval_minutes*60*1000);
+		setInterval(updateTimer, 1*60*1000);
 	});
 	</script>
 	<script>
