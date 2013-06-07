@@ -27,7 +27,7 @@
 	<table class="table-striped">
 		<tbody>
 			<thead>
-				<tr><th colspan="6">Last updated 16:56pm<br><span>This page will update itself in 5 minutes.</span></th></tr>
+				<tr><th colspan="6">Last updated 16:57pm<br><span>This page will update itself in 5 minutes.</span></th></tr>
 			</thead>
 			<tr>
 				<th colspan="6">Fri 7th Jun 2013</th>
@@ -621,9 +621,8 @@
 	<script src="http://code.jquery.com/jquery.js"></script>
 	<script>
 	$(function() {
-		var interval_minutes = 5;
-		function updateTimer(t) {
-			var msg = $("table thead span").text().replace(/[0-9]+ minutes?.$/, ''),
+		function updateTimer (t) {
+			var msg = config.update_msg,
 				intMin = parseInt( $("table thead span").text().replace(/[^0-9]/g, '') );
 			if (t != undefined) {
 				msg += t;
@@ -635,25 +634,49 @@
 				$("table thead span").text(msg);
 			}
 		}
-		function updatePage(interval_minutes) {
+		function updatePage () {
 			var q = encodeURIComponent("SELECT * FROM html WHERE url='https://raw.github.com/jdbevan/heartinternetstatus/gh-pages/index.html'");
-			$.getJSON("http://query.yahooapis.com/v1/public/yql?q=" + q + "&format=xml&callback=?",
-				function(data) {
+
+			// Prevent the 0 minutes displaying
+			clearInterval(config.countdown_timer);
+
+			$.ajax({
+				timeout: 5*1000,	// Required to throw an error when script doesn't load
+				dataType: "json",
+				url: "http://query.yahooapis.com/v1/public/yql?q=" + q + "&format=xml&callback=?",
+				success: function(data) {
 					if (data.results.length > 0) {
 						var html = $.parseHTML(data.results[0]);
 						for(var i=0, m=html.length; i<m; i++){
 							if (html[i].nodeName.toLowerCase() === "table") {
 								$("table").replaceWith(html[i]);
-								updateTimer(interval_minutes);
+								// Make sure HTML displaying correct countdown time to next refresh
+								updateTimer(config.update_interval);
+								// Reset the countdown timer
+								config.countdown_timer = setInterval(updateTimer, config.countdown_interval*60*1000);
 								break;
 							}
 						}
 					}
-				});
+				},
+				error: function(){
+					$("table thead span").text("Uh-oh, spaghetti hoops... Let's try that again!");
+					setTimeout(updatePage, 10*1000);
+				}
+			});
 		}
-		updatePage(interval_minutes);
-		setInterval(function() { updatePage(interval_minutes); }, interval_minutes*60*1000);
-		setInterval(updateTimer, 1*60*1000);
+		function start () {
+			updatePage();
+			config.update_timer = setInterval(updatePage, config.update_interval*60*1000);
+		}
+		var config = {
+			update_msg: "This page will update itself in ",
+			update_timer: null,
+			update_interval: 5,
+			countdown_timer: null,
+			countdown_interval: 1,
+		};
+		start();
 	});
 	</script>
 	<script>
