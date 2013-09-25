@@ -27,7 +27,7 @@
 	<table class="table-striped">
 		<tbody>
 			<thead>
-				<tr><th colspan="6">Last updated 12:45pm<br><span>This page will update itself in 5 minutes.</span></th></tr>
+				<tr><th colspan="6">Last updated 12:50pm<br><span>This page will update itself in 5 minutes.</span></th></tr>
 			</thead>
 			<tr>
 				<th colspan="6">Wed 25th Sep 2013</th>
@@ -146,7 +146,7 @@
 			</tr>
 			<tr>
 				<td>Up:</td>
-				<td><span class="btn btn-info">98.43%</span></td>
+				<td><span class="btn btn-info">98.44%</span></td>
 				<td><span class="btn btn-info">99.99%</span></td>
 				<td><span class="btn btn-info">100.00%</span></td>
 				<td><span class="btn btn-info">100.00%</span></td>
@@ -603,11 +603,15 @@
 			}
 		}
 		function updatePage () {
-			var q = encodeURIComponent("SELECT * FROM html WHERE url='https://raw.github.com/jdbevan/heartinternetstatus/gh-pages/index.html'");
+			// var q = encodeURIComponent("SELECT * FROM html WHERE url='https://raw.github.com/jdbevan/heartinternetstatus/gh-pages/index.html'");
 
 			// Prevent the 0 minutes displaying
 			clearInterval(config.countdown_timer);
 
+			/*
+			 * Github added a robots.txt to prevent scraping content
+			 * Maybe I'll get round to using their API sometime
+			 *
 			$.ajax({
 				timeout: 5*1000,	// Required to throw an error when script doesn't load
 				dataType: "json",
@@ -635,10 +639,12 @@
 					ga('send', 'event', 'YQL', 'load-fail', {'nonInteraction':1});
 				}
 			});
+			*/
+			window.location.reload(true);
 		}
 		function start () {
-			updatePage();
-			/* config.update_timer = setTimeout(updatePage, config.update_interval*60*1000); */
+			//updatePage();
+			config.update_timer = setTimeout(updatePage, config.update_interval*60*1000);
 		}
 		var config = {
 			update_msg: "This page will update itself in ",
