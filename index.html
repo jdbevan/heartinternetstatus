@@ -27,7 +27,7 @@
 	<table class="table-striped">
 		<tbody>
 			<thead>
-				<tr><th colspan="6">Last updated 16:45pm<br><span>This page will update itself in 5 minutes.</span></th></tr>
+				<tr><th colspan="6">Last updated 16:50pm<br><span>This page will update itself in 5 minutes.</span></th></tr>
 			</thead>
 			<tr>
 				<th colspan="6">Wed 12th Feb 2014</th>
@@ -121,6 +121,7 @@
 		function start () {
 			//updatePage();
 			config.update_timer = setTimeout(updatePage, config.update_interval*60*1000);
+			config.countdown_timer = setInterval(updateTimer, config.countdown_interval*60*1000);
 		}
 		var config = {
 			update_msg: "This page will update itself in ",
